@@ -1,18 +1,22 @@
 package com.smoothstack.jan2020.LmsJDBC.template;
 
 import com.smoothstack.jan2020.LmsJDBC.Debug;
+import com.smoothstack.jan2020.LmsJDBC.model.Author;
+import com.smoothstack.jan2020.LmsJDBC.model.Book;
 import com.smoothstack.jan2020.LmsJDBC.model.Borrower;
 import com.smoothstack.jan2020.LmsJDBC.model.Library;
-import com.smoothstack.jan2020.LmsJDBC.mvc.Model;
-import com.smoothstack.jan2020.LmsJDBC.mvc.RequestParam;
+import com.smoothstack.jan2020.LmsJDBC.mvc.*;
 import com.smoothstack.jan2020.LmsJDBC.mvc.Template;
-import com.smoothstack.jan2020.LmsJDBC.mvc.View;
 import com.smoothstack.jan2020.LmsJDBC.ui.KeyboardScanner;
 import com.smoothstack.jan2020.LmsJDBC.ui.SelectOption;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class BorrowerTemplate implements View {
 
@@ -61,7 +65,7 @@ public class BorrowerTemplate implements View {
         String callback = (String) model.getOrDefault("callback", "borrower");
         Borrower borrower = (Borrower) model.get("borrower");
         @SuppressWarnings("unchecked")
-        List<Library> libraryList= (List<Library>) model.getOrDefault("libraryList", new ArrayList<String>());
+        List<Library> libraryList= (List<Library>) model.getOrDefault("libraryList", new ArrayList<>());
         SelectOption<Library, Library> menu = new SelectOption<>();
         menu.setBanner(String.format("Hi %s,\nPick the branch you want to check out from\n", borrower.getName()));
         menu.setAbortMessage("Go back to borrower menu");
@@ -89,5 +93,64 @@ public class BorrowerTemplate implements View {
         Debug.printf("Callback -> '%s'\n", callback);
         return callback;
 
+    }
+
+    @Template("borrower_choose_book")
+    public String bookSelector(Model model, RequestParam requestParam) {
+        String callback = (String) model.getOrDefault("callback", "borrower");
+        Borrower borrower = (Borrower) model.get("borrower");
+        Library library = (Library) model.get("library");
+
+        @SuppressWarnings("unchecked")
+        List<Book> bookList= (List<Book>) model.getOrDefault("bookList", new ArrayList<>());
+        @SuppressWarnings("unchecked")
+        Map<Book, List<Author>> authorMap =(Map<Book, List<Author>>) model.get("authorMap");
+
+        SelectOption<Book, Book> menu = new SelectOption<>();
+        menu.setBanner(String.format("Hi %s,\nPick the book you want to check out\n", borrower.getName()));
+        menu.setAbortMessage("Go back to borrower menu");
+
+        menu.getItems().addAll(bookList);
+
+        // Menu should display Library name
+        menu.setLabelMapper(b -> { return String.format("%s by %s",b.getTitle(),
+                authorMap.get(b).stream().map(Author::getName).collect(Collectors.joining(", "))); } );
+
+        // Menu should return Library
+        menu.setValueMapper((book,i)->book);
+
+        menu.setPrompt("\nBook you want to checkout> ");
+
+        Book book = menu.get();
+
+        if (book != null)
+            Debug.printf("User select '%s'\n", book.entityDump());
+        else
+            Debug.println("User abort!");
+
+        requestParam.put("borrower", borrower);
+        requestParam.put("library", library);
+        requestParam.put("book", book);
+        requestParam.put("abort", book==null);
+        Debug.printf("Callback -> '%s'\n", callback);
+        return callback;
+
+    }
+
+    @Template("process_borrow_book")
+    public String processBorrowBook(Model model, RequestParam requestParam) {
+        String callback = (String) model.getOrDefault("callback", "borrower");
+        Borrower borrower = (Borrower) model.get("borrower");
+        Library library = (Library) model.get("library");
+        Book book  = (Book) model.get("book");
+
+        String error  = (String) model.get("error");
+        String info = (String) model.get("info");
+
+        if (error!=null) System.err.println(error);
+
+        if (info!=null) System.out.println(info);
+
+        return callback;
     }
 }

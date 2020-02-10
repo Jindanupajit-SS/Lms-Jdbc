@@ -31,4 +31,9 @@ public class Debug {
         String message = String.format(format, objects);
         System.err.print(message.replaceAll("^"," * "));
     }
+
+    public static <R> R tee(R obj) {
+        println(obj.toString());
+        return obj;
+    }
 }

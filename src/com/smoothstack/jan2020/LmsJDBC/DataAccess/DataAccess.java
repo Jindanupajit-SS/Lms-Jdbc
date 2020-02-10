@@ -5,12 +5,12 @@ import com.smoothstack.jan2020.LmsJDBC.DataAccess.Utils.Table;
 import com.smoothstack.jan2020.LmsJDBC.DataAccess.Utils.Where;
 import com.smoothstack.jan2020.LmsJDBC.Debug;
 import com.smoothstack.jan2020.LmsJDBC.entity.*;
-import com.smoothstack.jan2020.LmsJDBC.persistence.TableName;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -170,6 +170,50 @@ public class DataAccess<T extends Entity>  implements Closeable {
 
     }
 
+    public static <R> List<R> executeQuery(Connection connection, String sqlStatement, Function<ResultSet, R> extractor, Object... objects) throws SQLException {
+        Debug.println("executeQuery:");
+        PreparedStatement pstmt = getPreparedStatement(connection, sqlStatement, objects);
+
+        ResultSet rs = pstmt.executeQuery();
+
+        return extractResult(rs, extractor);
+    }
+
+    public static void executeUpdate(Connection connection, String sqlStatement, Object... objects) throws SQLException {
+        Debug.println("executeUpdate:");
+        PreparedStatement pstmt = getPreparedStatement(connection, sqlStatement, objects);
+
+
+        pstmt.executeUpdate();
+
+    }
+
+   public static PreparedStatement getPreparedStatement(Connection connection, String sqlStatement, Object... objects) throws SQLException {
+        PreparedStatement pstmt = connection.prepareStatement(Debug.tee(sqlStatement));
+
+        List<Object> objectList = Arrays.asList(objects);
+        for (int i = 0; i < objectList.size(); i++) {
+            pstmt.setObject(1 + i, objectList.get(i));
+            Debug.printf(" ?[%d] = %s\n", i+1, objectList.get(i));
+        }
+
+        return pstmt;
+    }
+
+    public static <R> List<R> extractResult(ResultSet rs, Function<ResultSet, R> extract) throws SQLException {
+        Debug.println("extractResult:");
+        List<R> resultList = new ArrayList<>();
+        while(rs.next()) {
+            R result = extract.apply(rs);
+            resultList.add(result);
+            if (result instanceof Entity)
+                Debug.println(((Entity) result).entityDump());
+            else
+                Debug.println(result.toString());
+        }
+
+        return resultList;
+    }
     public <R> List<R> read(Class<R> object, Table table, Condition... filter) {
 
         String sqlStatement;
@@ -265,4 +309,5 @@ public class DataAccess<T extends Entity>  implements Closeable {
             e.printStackTrace();
         }
     }
+
 }

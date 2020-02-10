@@ -42,7 +42,7 @@ public class Main {
             e.printStackTrace();
         }
 
-        preloadData();
+        //preloadData();
 
         // Start the engine
         MVCEngine.start();
