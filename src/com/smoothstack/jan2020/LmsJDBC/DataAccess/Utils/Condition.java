@@ -1,9 +1,7 @@
-package com.smoothstack.jan2020.LmsJDBC.DataAccess.Condition;
+package com.smoothstack.jan2020.LmsJDBC.DataAccess.Utils;
 
 import com.smoothstack.jan2020.LmsJDBC.entity.Entity;
 import com.smoothstack.jan2020.LmsJDBC.entity.FieldInfo;
-
-import java.lang.reflect.Field;
 
 public class Condition<T extends Entity> {
     public static final int EQUAL = 0;

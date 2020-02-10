@@ -1,4 +1,4 @@
-package com.smoothstack.jan2020.LmsJDBC.DataAccess.Condition;
+package com.smoothstack.jan2020.LmsJDBC.DataAccess.Utils;
 
 import com.smoothstack.jan2020.LmsJDBC.entity.Entity;
 import com.smoothstack.jan2020.LmsJDBC.entity.FieldInfo;

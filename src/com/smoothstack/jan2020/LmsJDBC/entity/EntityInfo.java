@@ -13,8 +13,8 @@ public abstract class EntityInfo {
     private static Map<Class<? extends Entity>, Field> idField = new HashMap<>();
 
     public static String tableNameOf(Class<? extends Entity> cls) {
-        if (cls.isAnnotationPresent(Table.class))
-            return cls.getAnnotation(Table.class).value();
+        if (cls.isAnnotationPresent(TableName.class))
+            return cls.getAnnotation(TableName.class).value();
         else
             return cls.getSimpleName();
     }

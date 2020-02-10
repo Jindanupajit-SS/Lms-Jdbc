@@ -87,18 +87,23 @@ public interface Entity<T extends Entity> extends Serializable {
            throw new TypeMismatchException(fieldName);
     }
 
-    default String entityDump() throws IllegalAccessException, NoSuchMethodException, NoSuchFieldException, InvocationTargetException {
+    default String entityDump()  {
         final StringBuilder sb = new StringBuilder(this.getClass().getSimpleName());
         sb.append("{");
         StringBuilder sbField = new StringBuilder();
-        for (Field field : this.getClass().getDeclaredFields()) {
-            String singleQuote = field.getType().equals(String.class)?"'":"";
-            sbField .append(",")
-                    .append(field.getName())
-                    .append("=")
-                    .append(singleQuote)
-                    .append(this.entityGet(field.getName()))
-                    .append(singleQuote);
+        try {
+            for (Field field : this.getClass().getDeclaredFields()) {
+                String singleQuote = field.getType().equals(String.class)?"'":"";
+                sbField .append(",")
+                        .append(field.getName())
+                        .append("=")
+                        .append(singleQuote)
+                        .append(this.entityGet(field.getName()))
+                        .append(singleQuote);
+            }
+        } catch (NoSuchFieldException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            //e.printStackTrace();
+            sbField = new StringBuilder(" <exception-thrown>");
         }
         if (sbField.length()>0) sb.append(sbField.substring(1));
         sb.append('}');

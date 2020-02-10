@@ -3,9 +3,9 @@ package com.smoothstack.jan2020.LmsJDBC.model;
 import com.smoothstack.jan2020.LmsJDBC.entity.Entity;
 import com.smoothstack.jan2020.LmsJDBC.persistence.Column;
 import com.smoothstack.jan2020.LmsJDBC.persistence.Id;
-import com.smoothstack.jan2020.LmsJDBC.persistence.Table;
+import com.smoothstack.jan2020.LmsJDBC.persistence.TableName;
 
-@Table("tbl_library_branch")
+@TableName("tbl_library_branch")
 public class Library implements Entity<Library> {
 
     @Id

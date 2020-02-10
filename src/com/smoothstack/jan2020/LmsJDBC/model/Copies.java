@@ -3,9 +3,9 @@ package com.smoothstack.jan2020.LmsJDBC.model;
 import com.smoothstack.jan2020.LmsJDBC.persistence.Column;
 import com.smoothstack.jan2020.LmsJDBC.persistence.JoinColumn;
 import com.smoothstack.jan2020.LmsJDBC.persistence.OneToOne;
-import com.smoothstack.jan2020.LmsJDBC.persistence.Table;
+import com.smoothstack.jan2020.LmsJDBC.persistence.TableName;
 
-@Table("tbl_book_copies")
+@TableName("tbl_book_copies")
 public class Copies {
 
     @OneToOne

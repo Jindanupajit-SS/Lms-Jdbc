@@ -3,7 +3,7 @@ package com.smoothstack.jan2020.LmsJDBC.model;
 import com.smoothstack.jan2020.LmsJDBC.entity.Entity;
 import com.smoothstack.jan2020.LmsJDBC.persistence.*;
 
-@Table("tbl_book")
+@TableName("tbl_book")
 public class Book implements Entity<Book> {
 
     @Id

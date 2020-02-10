@@ -8,6 +8,7 @@ import com.smoothstack.jan2020.LmsJDBC.mvc.Controller;
 import com.smoothstack.jan2020.LmsJDBC.mvc.Mapping;
 import com.smoothstack.jan2020.LmsJDBC.mvc.Model;
 import com.smoothstack.jan2020.LmsJDBC.mvc.RequestParam;
+import com.smoothstack.jan2020.LmsJDBC.services.LibraryService;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -45,17 +46,10 @@ public class LibrarianController implements Controller {
             return "redirect:manageLibrary";
         }
 
-        try {
+        LibraryService libraryService = new LibraryService();
 
-            @SuppressWarnings("unchecked")
-            DataAccess<Library> libraryDAO = (DataAccess<Library>) DAOFactory.get(Library.class);
+        model.put("libraryList", libraryService.getLibraryList());
 
-            List<Library> libraryList = libraryDAO.read();
-            model.put("libraryList", libraryList);
-
-        } catch (NoSuchFieldException | SQLException e) {
-            e.printStackTrace();
-        }
         model.put("callback", "librarySelector");
         return "library_selector";
     }

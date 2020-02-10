@@ -1,9 +1,11 @@
 package com.smoothstack.jan2020.LmsJDBC.DataAccess;
 
-import com.smoothstack.jan2020.LmsJDBC.DataAccess.Condition.Condition;
-import com.smoothstack.jan2020.LmsJDBC.DataAccess.Condition.Where;
+import com.smoothstack.jan2020.LmsJDBC.DataAccess.Utils.Condition;
+import com.smoothstack.jan2020.LmsJDBC.DataAccess.Utils.Table;
+import com.smoothstack.jan2020.LmsJDBC.DataAccess.Utils.Where;
 import com.smoothstack.jan2020.LmsJDBC.Debug;
 import com.smoothstack.jan2020.LmsJDBC.entity.*;
+import com.smoothstack.jan2020.LmsJDBC.persistence.TableName;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -168,6 +170,20 @@ public class DataAccess<T extends Entity>  implements Closeable {
 
     }
 
+    public <R> List<R> read(Class<R> object, Table table, Condition... filter) {
+
+        String sqlStatement;
+
+        List<Where> where = new ArrayList<>();
+        for (Condition eachCondition : filter) {
+            if (eachCondition instanceof Where) {
+                where.add((Where) eachCondition);
+            }
+        }
+
+        // TODO: Finish this method
+        return null;
+    }
 
     // TODO: Cleanup
     public List<T> read(Condition... filter) throws NoSuchFieldException, SQLException {

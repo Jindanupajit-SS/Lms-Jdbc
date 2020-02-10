@@ -4,11 +4,11 @@ import com.smoothstack.jan2020.LmsJDBC.entity.Entity;
 import com.smoothstack.jan2020.LmsJDBC.persistence.Column;
 import com.smoothstack.jan2020.LmsJDBC.persistence.JoinColumn;
 import com.smoothstack.jan2020.LmsJDBC.persistence.OneToOne;
-import com.smoothstack.jan2020.LmsJDBC.persistence.Table;
+import com.smoothstack.jan2020.LmsJDBC.persistence.TableName;
 
 import java.time.LocalDate;
 
-@Table("tbl_book_loans")
+@TableName("tbl_book_loans")
 public class Loans implements Entity<Loans> {
 
     @OneToOne

@@ -54,14 +54,12 @@ public class LibraryTemplate implements View {
         menu.setPrompt("\nLibrary > ");
 
         Library library = menu.get();
-        try {
-            if (library != null)
-                Debug.printf("User select '%s'\n", library.entityDump());
-            else
-                Debug.println("User abort!");
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | NoSuchFieldException e) {
-            e.printStackTrace();
-        }
+
+        if (library != null)
+            Debug.printf("User select '%s'\n", library.entityDump());
+        else
+            Debug.println("User abort!");
+
         requestParam.put("library", library);
         requestParam.put("abort", library==null);
         Debug.printf("Callback -> '%s'\n", callback);
