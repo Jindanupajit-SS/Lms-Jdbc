@@ -38,4 +38,5 @@ public class ConnectionBuilder implements DatabaseConnection {
         return ConnectionBuilder.defaultProperties = properties;
     }
 
+
 }

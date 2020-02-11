@@ -21,7 +21,7 @@ public class BookService implements Service {
                     "SELECT b.bookId, b.title, b.pubId FROM tbl_book b JOIN tbl_book_copies c on b.bookId = c.bookId " +
                             "JOIN tbl_library_branch l on l.branchId = c.branchId " +
                             "WHERE c.branchId = ? AND c.noOfCopies >= ? "
-                    , DataExtractor::Book
+                    , DataExtractor::getBook
                     , library.getId(), minimumNoOfCopies);
 
         } catch (SQLException | ClassNotFoundException e) {
@@ -36,7 +36,7 @@ public class BookService implements Service {
                     "SELECT a.authorId, a.authorName FROM tbl_book b JOIN tbl_book_authors ba on b.bookId = ba.bookId " +
                             "JOIN tbl_author a on ba.authorId = a.authorId " +
                             "WHERE b.bookId = ? "
-                    , DataExtractor::Author
+                    , DataExtractor::getAuthor
                     , book.getId());
 
         } catch (SQLException | ClassNotFoundException e) {
@@ -129,13 +129,15 @@ public class BookService implements Service {
     public List<Loans> getBookListBorrowedByBorrower(Borrower borrower) {
         try (Connection connection = new ConnectionBuilder().getConnection() ) {
             List<Loans> lonasList = DataAccess.executeQuery(connection,
-                    "SELECT bl.bookId, bl.branchId, bl.cardNo, bl.dateOut, bl.dueDate " +
-                            "" +
+                    "SELECT bl.bookId, bl.branchId, bl.cardNo, bl.dateOut, bl.dueDate, " +
+                            "b.bookId, b.title, b.pubId, " +
+                            "l.branchId, l.branchName, l.branchAddress, " +
+                            "r.cardNo, r.name, r.address, r.phone" +
                             "FROM tbl_book b JOIN tbl_book_loans bl on b.bookId = bl.bookId " +
                             "JOIN tbl_library_branch l on l.branchId = bl.branchId " +
                             "JOIN tbl_borrower r on r.cardNo = bl.cardNo " +
                             "WHERE dateIn is null AND bl.cardNo = ? "
-                    , DataExtractor::Loans
+                    , DataExtractor::getLoans
                     , borrower.getId());
 
 
