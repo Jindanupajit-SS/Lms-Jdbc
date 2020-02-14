@@ -6,20 +6,15 @@ import com.smoothstack.jan2020.LmsJDBC.DataAccess.DAOFactory;
 import com.smoothstack.jan2020.LmsJDBC.DataAccess.DataAccess;
 import com.smoothstack.jan2020.LmsJDBC.Debug;
 import com.smoothstack.jan2020.LmsJDBC.entity.FieldInfoMap;
-import com.smoothstack.jan2020.LmsJDBC.model.Author;
-import com.smoothstack.jan2020.LmsJDBC.model.Book;
-import com.smoothstack.jan2020.LmsJDBC.model.Borrower;
-import com.smoothstack.jan2020.LmsJDBC.model.Library;
+import com.smoothstack.jan2020.LmsJDBC.model.*;
 import com.smoothstack.jan2020.LmsJDBC.mvc.Controller;
 import com.smoothstack.jan2020.LmsJDBC.mvc.Mapping;
 import com.smoothstack.jan2020.LmsJDBC.mvc.Model;
 import com.smoothstack.jan2020.LmsJDBC.mvc.RequestParam;
 import com.smoothstack.jan2020.LmsJDBC.services.BookService;
 import com.smoothstack.jan2020.LmsJDBC.services.LibraryService;
-import com.smoothstack.jan2020.LmsJDBC.template.Template;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -69,9 +64,11 @@ public class BorrowerController implements Controller {
             return "redirect:borrower";
 
         requestParam.put("borrower", borrower);
+        requestParam.remove("choice");
 
         switch (choice) {
             case 1: return "redirect:borrowerChooseLibrary";
+            case 2: return "redirect:returnBook";
             case 3: return "redirect:home";
         }
 
@@ -106,8 +103,11 @@ public class BorrowerController implements Controller {
         Library library = (Library) requestParam.get("library");
         Book book = (Book) requestParam.get("book");
         boolean abort = (boolean) requestParam.getOrDefault("abort", false);
+        requestParam.remove("abort");
 
-
+        if (abort) {
+            return "redirect:proceedBorrower";
+        }
 
         if (borrower == null)
             return "redirect:borrower";
@@ -118,9 +118,7 @@ public class BorrowerController implements Controller {
         if (book != null)
             return "redirect:processBorrowBook";
 
-        requestParam.clear();
-        if (abort)
-            return "redirect:proceedBorrower";
+
 
         BookService bookService = new BookService();
         List<Book> bookList = bookService.getBookListAtLibrary(library, 1);
@@ -161,5 +159,34 @@ public class BorrowerController implements Controller {
 
         model.put("callback","proceedBorrower");
         return "process_borrow_book";
+    }
+
+    @Mapping("returnBook")
+    public String returnBook(Model model, RequestParam requestParam) {
+        Borrower borrower = (Borrower) requestParam.get("borrower");
+        Loans loans = (Loans) requestParam.get("loans");
+
+        BookService bookService = new BookService();
+
+        if (loans != null) {
+            if (bookService.returnBookToLibraryByLoans(loans))
+                model.put("info","Successfully return book to library.");
+            else
+                model.put("error", "Return operation failed!");
+
+            model.put("borrower", borrower);
+            model.put("callback", "proceedBorrower");
+            return "borrower_menu";
+        }
+
+        List<Loans> loansList = bookService.getBookListBorrowedByBorrower(borrower);
+
+        model.put("loansList", loansList);
+        model.put("borrower", borrower);
+        model.put("callback", "returnBook");
+
+
+        return "return_book";
+
     }
 }

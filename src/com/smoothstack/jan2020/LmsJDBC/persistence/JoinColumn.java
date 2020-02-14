@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JoinColumn {
 
-    String name() default "";
+    String name();
+    String prompt() default "";
     String referencedColumnName() default "";
 }

@@ -8,11 +8,11 @@ import com.smoothstack.jan2020.LmsJDBC.persistence.TableName;
 @TableName("tbl_book_copies")
 public class Copies {
 
-    @OneToOne
+    @OneToOne(Book.class)
     @JoinColumn(name = "bookId", referencedColumnName = "bookId")
     private Book book;
 
-    @OneToOne
+    @OneToOne(Library.class)
     @JoinColumn(name = "branchId", referencedColumnName = "branchId")
     private Library library;
 

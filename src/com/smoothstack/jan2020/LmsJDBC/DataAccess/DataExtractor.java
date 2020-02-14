@@ -52,6 +52,37 @@ public abstract class DataExtractor {
         return author;
     }
 
+    public static Library getLibrary(ResultSet resultSet, int... customIndex) {
+
+        int[] index = getCustomIndex(1,3, customIndex);
+
+        Library library = new Library();
+        try {
+            library.setId(resultSet.getInt(index[0]));
+            library.setName(resultSet.getString(index[1]));
+            library.setAddress(resultSet.getString(index[2]));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return library;
+    }
+
+    public static Borrower getBorrower(ResultSet resultSet, int... customIndex) {
+
+        int[] index = getCustomIndex(1,4, customIndex);
+
+        Borrower borrower = new Borrower();
+        try {
+            borrower.setId(resultSet.getInt(index[0]));
+            borrower.setName(resultSet.getString(index[1]));
+            borrower.setAddress(resultSet.getString(index[2]));
+            borrower.setPhone(resultSet.getString(index[3]));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return borrower;
+    }
+
     public static int getIntegerAtFirstColumn(ResultSet resultSet, int... customIndex) {
         int[] index = getCustomIndex(1,1, customIndex);
         try {
@@ -75,10 +106,10 @@ public abstract class DataExtractor {
 
 
             library.setId(resultSet.getInt(index[1]));
-            loans.setLibrary(library);
+
 
             borrower.setId(resultSet.getInt(index[2]));
-            loans.setBorrower(borrower);
+
 
             loans.setOut(resultSet.getDate(index[3]).toLocalDate());
 
@@ -86,6 +117,12 @@ public abstract class DataExtractor {
 
             book = getBook(resultSet, 6, 7, 8);
             loans.setBook(book);
+
+            library = getLibrary(resultSet, 9, 10, 11);
+            loans.setLibrary(library);
+
+            borrower = getBorrower(resultSet, 12, 13, 14, 15);
+            loans.setBorrower(borrower);
 
         } catch (SQLException e) {
             e.printStackTrace();

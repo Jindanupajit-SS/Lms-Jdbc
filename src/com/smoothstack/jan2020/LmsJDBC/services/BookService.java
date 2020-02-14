@@ -132,8 +132,9 @@ public class BookService implements Service {
                     "SELECT bl.bookId, bl.branchId, bl.cardNo, bl.dateOut, bl.dueDate, " +
                             "b.bookId, b.title, b.pubId, " +
                             "l.branchId, l.branchName, l.branchAddress, " +
-                            "r.cardNo, r.name, r.address, r.phone" +
-                            "FROM tbl_book b JOIN tbl_book_loans bl on b.bookId = bl.bookId " +
+                            "r.cardNo, r.name, r.address, r.phone " +
+                            "FROM tbl_book b " +
+                            "JOIN tbl_book_loans bl on b.bookId = bl.bookId " +
                             "JOIN tbl_library_branch l on l.branchId = bl.branchId " +
                             "JOIN tbl_borrower r on r.cardNo = bl.cardNo " +
                             "WHERE dateIn is null AND bl.cardNo = ? "
@@ -148,5 +149,52 @@ public class BookService implements Service {
             e.printStackTrace();
             return new ArrayList<>();
         }
+    }
+
+    public boolean returnBookToLibraryByLoans(Loans loans) {
+        boolean success = false;
+        Connection connection = null;
+
+
+        try {
+            connection = new ConnectionBuilder().getConnection();
+            DataAccess.executeUpdate(connection,
+                    "UPDATE tbl_book_copies SET noOfCopies = noOfCopies + 1 " +
+                            "WHERE bookId = ? AND branchId = ? "
+                    , loans.getBook().getId(), loans.getLibrary().getId()
+            );
+
+            LocalDate dateIn = LocalDate.now();
+            Date jDateIn = Date.valueOf(dateIn);
+
+            DataAccess.executeUpdate(connection,
+                    "UPDATE tbl_book_loans SET dateIn = ? " +
+                            "WHERE bookId = ? AND branchId = ? AND cardNo = ?"
+                    , jDateIn, loans.getBook().getId(), loans.getLibrary().getId(), loans.getBorrower().getId()
+            );
+
+            connection.commit();
+            success = true;
+
+        } catch (SQLException | ClassNotFoundException e) {
+            if(connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+
+        } finally  {
+            try {
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return success;
     }
 }

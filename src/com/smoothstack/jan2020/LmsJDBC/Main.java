@@ -6,11 +6,13 @@ import com.smoothstack.jan2020.LmsJDBC.DataAccess.DataAccess;
 import com.smoothstack.jan2020.LmsJDBC.controller.BorrowerController;
 import com.smoothstack.jan2020.LmsJDBC.controller.HomeController;
 import com.smoothstack.jan2020.LmsJDBC.controller.LibrarianController;
+import com.smoothstack.jan2020.LmsJDBC.model.Book;
 import com.smoothstack.jan2020.LmsJDBC.model.Library;
 import com.smoothstack.jan2020.LmsJDBC.mvc.MVCEngine;
 import com.smoothstack.jan2020.LmsJDBC.template.BorrowerTemplate;
 import com.smoothstack.jan2020.LmsJDBC.template.LibraryTemplate;
 import com.smoothstack.jan2020.LmsJDBC.template.MainTemplate;
+import com.smoothstack.jan2020.LmsJDBC.template.admin.Form;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,6 +30,16 @@ public class Main {
 
         // Load properties from file
         loadProperties();
+
+        Book book = new Book();
+        book.setId(0);
+        book.setTitle("Test Title");
+        Form<Book> bookForm = new Form<>();
+
+
+        book = bookForm.input(book);
+
+        System.out.println(book.entityDump());
 
         // Register Controller and View
         try {

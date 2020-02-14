@@ -27,6 +27,21 @@ public class KeyboardScanner {
         return keyboardScanner.nextLine().trim();
     }
 
+    public static int getIntegerOrDefault(String prompt, int defaultValue) {
+        return getIntegerOrDefault(prompt, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
+    }
+    public static int getIntegerOrDefault(String prompt, int defaultValue, int min, int max) {
+        while(true)
+            try {
+                int input = Integer.parseInt(getStringOrDefault(prompt, String.valueOf(defaultValue)));
+                if ((input < min) || (input > max))
+                    throw new NumberFormatException();
+                return input;
+            } catch (NumberFormatException e) {
+                System.out.printf(" *** Please enter a number between %d and %d.\n\n", min, max);
+            }
+    }
+
     public static int getInteger(String prompt) {
         return getInteger(prompt, Integer.MIN_VALUE, Integer.MAX_VALUE);
     }

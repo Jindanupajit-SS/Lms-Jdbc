@@ -24,6 +24,11 @@ public class Publisher implements Entity<Publisher> {
     public Publisher() {
     }
 
+    @Override
+    public String toMenuLabel() {
+        return String.format("%s (%s)", getName(), getAddress());
+    }
+
     public Integer getId() {
         return id;
     }

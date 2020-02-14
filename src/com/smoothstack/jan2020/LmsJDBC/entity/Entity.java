@@ -12,6 +12,7 @@ import java.lang.reflect.Modifier;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@SuppressWarnings("unchecked")
 public interface Entity<T extends Entity> extends Serializable {
 
     /**
@@ -36,7 +37,7 @@ public interface Entity<T extends Entity> extends Serializable {
                 + (fieldName.length()>1?fieldName.substring(1):""));
 
         return (field.isAnnotationPresent(OneToOne.class))?
-                new RelationToOne<T>((T) getter.invoke(this)).getReferencedValue()
+                new RelationToOne<T>((T) getter.invoke(this), field.getAnnotation(OneToOne.class).value())
                 : getter.invoke(this);
 
     }
@@ -58,7 +59,7 @@ public interface Entity<T extends Entity> extends Serializable {
 
                 if (Modifier.isPublic(getter.getModifiers())) {
                     Object value = (field.isAnnotationPresent(OneToOne.class))?
-                            new RelationToOne<T>((T) getter.invoke(this)).getReferencedValue()
+                            new RelationToOne<T>((T) getter.invoke(this), field.getAnnotation(OneToOne.class).value())
                             : getter.invoke(this);
                     fieldMap.put(fieldName, value);
                 }
@@ -111,4 +112,7 @@ public interface Entity<T extends Entity> extends Serializable {
     }
 
 
+    default String toMenuLabel() {
+        return entityDump();
+    }
 }

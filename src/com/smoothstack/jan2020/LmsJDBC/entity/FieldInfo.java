@@ -45,6 +45,17 @@ public class FieldInfo{
         return field.getName();
     }
 
+    public String getInputPrompt() {
+        String prompt = "";
+        if (field.isAnnotationPresent(Column.class)) {
+            prompt = field.getAnnotation(Column.class).prompt();
+        }
+        if (field.isAnnotationPresent(JoinColumn.class)) {
+            prompt = field.getAnnotation(JoinColumn.class).prompt();
+        }
+        return "".equals(prompt)?getEntityName()+"."+getFieldName()+" > ":prompt;
+    }
+
     public boolean is(Class annotation) {
         return field.isAnnotationPresent(annotation);
     }

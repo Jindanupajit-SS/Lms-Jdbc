@@ -11,15 +11,15 @@ import java.time.LocalDate;
 @TableName("tbl_book_loans")
 public class Loans implements Entity<Loans> {
 
-    @OneToOne
+    @OneToOne(Book.class)
     @JoinColumn(name = "bookId", referencedColumnName = "bookId")
     private Book book;
 
-    @OneToOne
+    @OneToOne(Library.class)
     @JoinColumn(name = "branchId", referencedColumnName = "branchId")
     private Library library;
 
-    @OneToOne
+    @OneToOne(Borrower.class)
     @JoinColumn(name = "cardNo", referencedColumnName = "cardNo")
     private Borrower borrower;
 

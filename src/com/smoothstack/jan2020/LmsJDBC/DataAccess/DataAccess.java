@@ -1,7 +1,6 @@
 package com.smoothstack.jan2020.LmsJDBC.DataAccess;
 
 import com.smoothstack.jan2020.LmsJDBC.DataAccess.Utils.Condition;
-import com.smoothstack.jan2020.LmsJDBC.DataAccess.Utils.Table;
 import com.smoothstack.jan2020.LmsJDBC.DataAccess.Utils.Where;
 import com.smoothstack.jan2020.LmsJDBC.Debug;
 import com.smoothstack.jan2020.LmsJDBC.entity.*;
@@ -14,9 +13,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
-public class DataAccess<T extends Entity>  implements Closeable {
+public class DataAccess<R extends Entity>  implements Closeable {
     private Connection connection = null;
-    private Class<T> cls = null;
+    private Class<R> cls = null;
 
     DataAccess() {
 
@@ -24,18 +23,18 @@ public class DataAccess<T extends Entity>  implements Closeable {
 
     void init(Connection connection, Class<? extends Entity> cls) {
         this.connection = Objects.requireNonNull(connection);
-        this.cls = (Class<T>) cls;
+        this.cls = (Class<R>) cls;
     }
 
 
-    DataAccess(Connection connection, Class<T> cls) {
+    DataAccess(Connection connection, Class<R> cls) {
         this.connection = Objects.requireNonNull(connection);
         this.cls = cls;
     }
 
 
 
-    public void insert(T object) throws SQLException, NoSuchFieldException {
+    public void insert(R object) throws SQLException, NoSuchFieldException {
         FieldInfoMap fieldInfoMap = FieldInfoMap.of(object);
 
         if (fieldInfoMap.size() == 0)
@@ -78,7 +77,7 @@ public class DataAccess<T extends Entity>  implements Closeable {
 
     }
 
-    public void update(T object) throws SQLException, NoSuchFieldException {
+    public void update(R object) throws SQLException, NoSuchFieldException {
         FieldInfoMap fieldInfoMap = FieldInfoMap.of(object);
 
         if (fieldInfoMap.size() == 0)
@@ -133,7 +132,7 @@ public class DataAccess<T extends Entity>  implements Closeable {
 
     }
 
-    public void delete(T object) throws SQLException, NoSuchFieldException {
+    public void delete(R object) throws SQLException, NoSuchFieldException {
         FieldInfoMap fieldInfoMap = FieldInfoMap.of(object);
 
         ColumnMap idMap = new ColumnMap(fieldInfoMap);
@@ -183,9 +182,7 @@ public class DataAccess<T extends Entity>  implements Closeable {
         Debug.println("executeUpdate:");
         PreparedStatement pstmt = getPreparedStatement(connection, sqlStatement, objects);
 
-
         pstmt.executeUpdate();
-
     }
 
    public static PreparedStatement getPreparedStatement(Connection connection, String sqlStatement, Object... objects) throws SQLException {
@@ -194,7 +191,7 @@ public class DataAccess<T extends Entity>  implements Closeable {
         List<Object> objectList = Arrays.asList(objects);
         for (int i = 0; i < objectList.size(); i++) {
             pstmt.setObject(1 + i, objectList.get(i));
-            Debug.printf(" ?[%d] = %s\n", i+1, objectList.get(i));
+            Debug.printf("-> ?[%d] = %s\n", i+1, objectList.get(i));
         }
 
         return pstmt;
@@ -203,41 +200,34 @@ public class DataAccess<T extends Entity>  implements Closeable {
     public static <R> List<R> extractResult(ResultSet rs, Function<ResultSet, R> extract) throws SQLException {
         Debug.println("extractResult:");
         List<R> resultList = new ArrayList<>();
-        while(rs.next()) {
-            R result = extract.apply(rs);
-            resultList.add(result);
-            if (result instanceof Entity)
-                Debug.println(((Entity) result).entityDump());
-            else
-                Debug.println(result.toString());
+        int i = 0;
+        if (!rs.next()) {
+            Debug.println("<- [no result returned]");
+        } else {
+             do {
+                R result = extract.apply(rs);
+                resultList.add(result);
+                if (result instanceof Entity)
+                    Debug.printf("<- L[%d] = %s\n",i++, ((Entity) result).entityDump());
+                else
+                    Debug.printf("<- L[%d] = %s\n",i++, result.toString());
+            } while(rs.next());
         }
 
         return resultList;
     }
-    public <R> List<R> read(Class<R> object, Table table, Condition... filter) {
-
-        String sqlStatement;
-
-        List<Where> where = new ArrayList<>();
-        for (Condition eachCondition : filter) {
-            if (eachCondition instanceof Where) {
-                where.add((Where) eachCondition);
-            }
-        }
-
-        // TODO: Finish this method
-        return null;
-    }
 
     // TODO: Cleanup
-    public List<T> read(Condition... filter) throws NoSuchFieldException, SQLException {
+    public List<R> read(Condition... filter) throws NoSuchFieldException, SQLException {
 
         String sqlStatement;
 
         List<Where> where = new ArrayList<>();
-        for (Condition eachCondition : filter) {
-            if (eachCondition instanceof Where) {
-                where.add((Where) eachCondition);
+        if (filter != null) {
+            for (Condition eachCondition : filter) {
+                if (eachCondition instanceof Where) {
+                    where.add((Where) eachCondition);
+                }
             }
         }
 
@@ -259,28 +249,54 @@ public class DataAccess<T extends Entity>  implements Closeable {
         ResultSet resultSet = pstmt.executeQuery();
         ResultSetMetaData rsmd = resultSet.getMetaData();
 
-        List<T> objectList = new ArrayList<>();
+        List<R> objectList = new ArrayList<>();
         FieldInfoMap fieldInfoMap = FieldInfoMap.of(cls);
         while(resultSet.next()) {
-            T object = null;
+            R object = null;
             try {
                 object = cls.newInstance();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+            } catch (InstantiationException | IllegalAccessException e) {
+                Debug.printException(e);
             }
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                 String columnName = rsmd.getColumnName(i);
                 FieldInfo fieldInfo = fieldInfoMap.getByColumnName(columnName);
-                fieldInfo.setValue(object,
-                            resultSet.getObject(columnName, fieldInfo.getField().getType())
-                        );
+                Object value = resultSet.getObject(columnName, fieldInfo.getField().getType());
+
+                fieldInfo.setValue(object,value);
             }
+
             objectList.add(object);
+            Debug.printf("-> [%d] = %s\n", objectList.size(), object.entityDump());
         }
 
         return objectList;
+    }
+
+    @SuppressWarnings("unused")
+    public <RE> RE extractValue(ResultSet resultSet) {
+        R object = null;
+        try {
+            ResultSetMetaData rsmd = resultSet.getMetaData();
+            FieldInfoMap fieldInfoMap = FieldInfoMap.of(cls);
+
+
+            object = cls.newInstance();
+
+            for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                String columnName = rsmd.getColumnName(i);
+                FieldInfo fieldInfo = fieldInfoMap.getByColumnName(columnName);
+                fieldInfo.setValue(object,
+                        resultSet.getObject(columnName, fieldInfo.getField().getType())
+                );
+            }
+
+
+        } catch (Exception ignored) {}
+
+        @SuppressWarnings("unchecked")
+        RE ret = (RE) object;
+        return ret;
     }
 
     public void purge() throws SQLException {
@@ -299,6 +315,10 @@ public class DataAccess<T extends Entity>  implements Closeable {
 
     public Connection getConnection() {
         return connection;
+    }
+
+    public Class<R> getEntityClass() {
+        return cls;
     }
 
     @Override

@@ -1,15 +1,13 @@
 package com.smoothstack.jan2020.LmsJDBC.template;
 
 import com.smoothstack.jan2020.LmsJDBC.Debug;
-import com.smoothstack.jan2020.LmsJDBC.model.Author;
-import com.smoothstack.jan2020.LmsJDBC.model.Book;
-import com.smoothstack.jan2020.LmsJDBC.model.Borrower;
-import com.smoothstack.jan2020.LmsJDBC.model.Library;
+import com.smoothstack.jan2020.LmsJDBC.model.*;
 import com.smoothstack.jan2020.LmsJDBC.mvc.*;
 import com.smoothstack.jan2020.LmsJDBC.mvc.Template;
 import com.smoothstack.jan2020.LmsJDBC.ui.KeyboardScanner;
 import com.smoothstack.jan2020.LmsJDBC.ui.SelectOption;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,10 +37,17 @@ public class BorrowerTemplate implements View {
     public String borrowerMenu(Model model, RequestParam requestParam) {
         String callback = (String) model.getOrDefault("callback", "borrower");
         Borrower borrower = (Borrower) model.get("borrower");
-        String error = (String) model.get("error");
-        model.clear();
 
-        if (error != null) System.err.println(error);
+
+
+        String error  = (String) model.get("error");
+        String info = (String) model.get("info");
+
+        if (error!=null) System.err.println(error);
+
+        if (info!=null) System.out.println(info);
+
+        model.clear();
 
         SelectOption<String, Integer> menu = new SelectOption<>();
         menu.setBanner(String.format("Welcome %s\n\n", borrower.getName()));
@@ -151,6 +156,30 @@ public class BorrowerTemplate implements View {
 
         if (info!=null) System.out.println(info);
 
+        return callback;
+    }
+
+    @Template("return_book")
+    public String returnBook(Model model, RequestParam requestParam) {
+        String callback = (String) model.getOrDefault("callback", "borrower");
+        Borrower borrower = (Borrower) model.get("borrower");
+        @SuppressWarnings("unchecked")
+        List<Loans> loansList = (List<Loans>) model.get("loansList");
+
+        SelectOption<Loans, Loans> menu = new SelectOption<>();
+        menu.setBanner(String.format("Hi %s,\nPick the book you want to return\n", borrower.getName()));
+        menu.setAbortMessage("Go back to borrower menu");
+        menu.setPrompt("\nBook you want to return> ");
+        menu.getItems().addAll(loansList);
+
+        menu.setLabelMapper(loans-> String.format("%s from %s (%s) [Due: %s] ", loans.getBook().getTitle()
+                , loans.getLibrary().getName()
+                , loans.getLibrary().getAddress()
+                , loans.getDue().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))));
+        menu.setValueMapper((loans,i)->loans);
+        Loans loans = menu.get();
+        requestParam.put("borrower",borrower);
+        requestParam.put("loans", loans);
         return callback;
     }
 }

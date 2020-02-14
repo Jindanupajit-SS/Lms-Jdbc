@@ -13,7 +13,7 @@ public class Book implements Entity<Book> {
     @Column(name="title")
     private String title;
 
-    @OneToOne
+    @OneToOne(Publisher.class)
     @JoinColumn(name = "pubId", referencedColumnName = "publisherId")
     private Publisher publisher;
 
